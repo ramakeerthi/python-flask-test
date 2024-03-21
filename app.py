@@ -18,6 +18,7 @@ class Task(db.Model):
         return self.name
 
 taskFields = {
+    'id': fields.Integer,
     'name': fields.String
 }
 
@@ -42,22 +43,28 @@ class Item(Resource):
         task = Task.query.filter_by(id=pk).first()
         return task
     
-#     def put(self,pk):
-#         data = request.json
-#         testDB[pk]['name'] = data['name']
-#         return testDB
-    
-#     def delete(self,pk):
-#         del testDB[pk]
-#         return testDB
+    @marshal_with(taskFields)
+    def put(self,pk):
+        data = request.json
+        task = Task.query.filter_by(id=pk).first()
+        task.name = data['name']
+        db.session.add(task)
+        db.session.commit()
+        tasks = Task.query.all()
+        return tasks
+        
+        
+    @marshal_with(taskFields)
+    def delete(self,pk):
+        task = Task.query.filter_by(id=pk).first()
+        db.session.delete(task)
+        db.session.commit()
+        tasks = Task.query.all()
+        return tasks
+
 
 api.add_resource(Items, '/')
-# api.add_resource(Item, '/<int:pk>')
-
-# Basic route
-# @app.route('/')
-# def hello():
-#     return '<h1>Hello World!</h1>'
+api.add_resource(Item, '/<int:pk>')
 
 if __name__ == '__main__':
     app.run(debug=True)
