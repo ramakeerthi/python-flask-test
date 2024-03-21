@@ -27,6 +27,10 @@ class Item(Resource):
         data = request.json
         testDB[pk]['name'] = data['name']
         return testDB
+    
+    def delete(self,pk):
+        del testDB[pk]
+        return testDB
 
 api.add_resource(Items, '/')
 api.add_resource(Item, '/<int:pk>')
