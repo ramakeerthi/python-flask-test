@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, request
 from flask_restful import Resource, Api
 
 app = Flask(__name__)
@@ -13,8 +13,18 @@ testDB = {
 class Items(Resource):
     def get(self):
         return testDB
+    def post(self):
+        data = request.json
+        itemId = len(testDB.keys()) + 1
+        testDB[itemId] = {'name':data['name']}
+        return testDB
+
+class Item(Resource):
+    def get(self,pk):
+        return testDB[pk]
 
 api.add_resource(Items, '/')
+api.add_resource(Item, '/<int:pk>')
 
 # Basic route
 # @app.route('/')
