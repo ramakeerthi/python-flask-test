@@ -1,39 +1,45 @@
 from flask import Flask, request
 from flask_restful import Resource, Api
+from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
 api = Api(app)
 
-testDB = {
-    1:{'name':'Clean car'},
-    2:{'name':'Write blog'},
-    3:{'name':'Start stream'},
-}
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///todo.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db = SQLAlchemy(app)
+app.app_context().push()
+
+class Task(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(200), nullable=False)
+    
+    def __repr__(self):
+        return self.name
 
 class Items(Resource):
     def get(self):
-        return testDB
-    def post(self):
-        data = request.json
-        itemId = len(testDB.keys()) + 1
-        testDB[itemId] = {'name':data['name']}
-        return testDB
+        tasks = Task.query.all()
+        return tasks
+    # def get(self, pk):
+    #     task = Task.query.filter_by(id=pk).first()
+    #     return task
 
-class Item(Resource):
-    def get(self,pk):
-        return testDB[pk]
+# class Item(Resource):
+#     def get(self,pk):
+#         return testDB[pk]
     
-    def put(self,pk):
-        data = request.json
-        testDB[pk]['name'] = data['name']
-        return testDB
+#     def put(self,pk):
+#         data = request.json
+#         testDB[pk]['name'] = data['name']
+#         return testDB
     
-    def delete(self,pk):
-        del testDB[pk]
-        return testDB
+#     def delete(self,pk):
+#         del testDB[pk]
+#         return testDB
 
 api.add_resource(Items, '/')
-api.add_resource(Item, '/<int:pk>')
+# api.add_resource(Item, '/<int:pk>')
 
 # Basic route
 # @app.route('/')
