@@ -1,5 +1,5 @@
 from flask import Flask, request
-from flask_restful import Resource, Api
+from flask_restful import Resource, Api, marshal_with, fields
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
@@ -17,17 +17,30 @@ class Task(db.Model):
     def __repr__(self):
         return self.name
 
+taskFields = {
+    'name': fields.String
+}
+
 class Items(Resource):
+    @marshal_with(taskFields)
     def get(self):
         tasks = Task.query.all()
         return tasks
-    # def get(self, pk):
-    #     task = Task.query.filter_by(id=pk).first()
-    #     return task
+    
+    @marshal_with(taskFields)
+    def post(self):
+        data = request.json
+        task = Task(name=data['name'])
+        db.session.add(task)
+        db.session.commit()
+        tasks = Task.query.all()
+        return tasks
 
-# class Item(Resource):
-#     def get(self,pk):
-#         return testDB[pk]
+class Item(Resource):
+    @marshal_with(taskFields)
+    def get(self,pk):
+        task = Task.query.filter_by(id=pk).first()
+        return task
     
 #     def put(self,pk):
 #         data = request.json
